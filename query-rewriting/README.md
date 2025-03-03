@@ -1,31 +1,42 @@
-# 🦜 Production-ready RAG pipelines for chat applications
+# 🦜 Query Rewriting for RAG Systems
 
-This project showcases how you can work up from a simple RAG pipeline to a more
-complex setup that involves finetuning embeddings, reranking retrieved
-documents, and even finetuning the LLM itself. We'll do this all for a use case
-relevant to ZenML: a question answering system that can provide answers to
-common questions about ZenML. This will help you understand how to apply the
-concepts covered in this guide to your own projects.
+This project demonstrates an implementation of query rewriting for Retrieval-Augmented Generation (RAG) systems, with a strong focus on proper evaluation. Query rewriting enhances RAG by transforming ambiguous or poorly-formed user queries into more effective search queries, improving retrieval quality and final answer accuracy.
 
 ![](.assets/rag-pipeline-zenml-cloud.png)
 
-Contained within this project is all the code needed to run the full pipelines.
-You can follow along [in our
-guide](https://docs.zenml.io/user-guide/llmops-guide/) to understand the
-decisions and tradeoffs behind the pipeline and step code contained here. You'll
-build a solid understanding of how to leverage LLMs in your MLOps workflows
-using ZenML, enabling you to build powerful, scalable, and maintainable
-LLM-powered applications.
+## What is Query Rewriting?
 
-This project contains all the pipeline and step code necessary to follow along
-with the guide. You'll need a PostgreSQL database to store the embeddings; full
-instructions are provided below for how to set that up.
+Query rewriting takes the original user query and expands or reformulates it into multiple queries that can better retrieve relevant information. For example:
 
-## 📽️ Watch the webinars
+- **User Query**: *"How do I configure secrets in ZenML?"*
+- **Rewritten Queries**: 
+  - *"What are the steps for implementing secrets management in ZenML?"*
+  - *"How to set up and use secrets in ZenML pipelines?"*
+  - *"ZenML secrets configuration documentation"*
 
-We've recently been holding some webinars about this repository and project. Watch the videos below if you want an introduction and context around the code and ideas covered in this project.
+This technique can significantly improve retrieval quality, but without proper evaluation, it can also introduce errors or drift from the user's original intent.
 
-[![Building and Optimizing RAG Pipelines: Data Preprocessing, Embeddings, and Evaluation with ZenML](https://github.com/user-attachments/assets/1aea2bd4-8079-4ea2-98e1-8da6ba9aeebe)](https://www.youtube.com/watch?v=PazRMY8bo3U)
+## Why Evaluation Matters
+
+While query rewriting can improve RAG system performance, it requires rigorous evaluation to ensure:
+
+1. **Intent preservation**: Rewritten queries should maintain the original user's intent
+2. **Domain accuracy**: Rewrites should use domain-specific terminology correctly
+3. **Balance**: Avoiding overly specific or overly general rewrites
+4. **Adaptability**: Monitoring for drift as language patterns and terminology evolve
+
+This project implements both the query rewriting technique and comprehensive evaluation pipelines to measure its effectiveness.
+
+## Project Components
+
+This project includes:
+
+1. **RAG Ingestion Pipeline**: Processes documents, generates embeddings, and creates the vector index
+2. **Query Rewriting Implementation**: Expands user queries into multiple search queries
+3. **Evaluation Pipeline**: Measures the effectiveness of query rewriting through multiple metrics
+4. **Deployment Pipeline**: Deploys the RAG application with query rewriting to a Hugging Face Space
+
+All pipelines are implemented using ZenML, providing tracking, caching, and visualization capabilities.
 
 ## 🏃 How to run
 
@@ -114,6 +125,17 @@ Note that Claude will require a different API key from Anthropic. See [the
 `litellm` docs](https://docs.litellm.ai/docs/providers/anthropic) on how to set
 this up.
 
+### Run the evaluation pipeline
+
+To run the evaluation pipeline, you can use the following command:
+
+```shell
+python run.py evaluation
+```
+
+You'll need to have first run the RAG pipeline to have the necessary assets in
+the database to evaluate.
+
 ### Deploying the RAG pipeline
 
 ![](.assets/huggingface-space-rag-deployment.png)
@@ -153,95 +175,20 @@ python run.py deploy
 This will open a Hugging Face space in your browser where you can interact with
 the RAG pipeline.
 
-### Run the LLM RAG evaluation pipeline
-
-To run the evaluation pipeline, you can use the following command:
-
-```shell
-python run.py evaluation
-```
-
-You'll need to have first run the RAG pipeline to have the necessary assets in
-the database to evaluate.
-
-## Embeddings finetuning
-
-For embeddings finetuning we first generate synthetic data and then finetune the
-embeddings. Both of these pipelines are described in [the LLMOps guide](https://docs.zenml.io/v/docs/user-guide/llmops-guide/finetuning-embeddings) and
-instructions for how to run them are provided below.
-
-### Run the `distilabel` synthetic data generation pipeline
-
-To run the `distilabel` synthetic data generation pipeline, you can use the following commands:
-
-```shell
-pip install -r requirements-argilla.txt # special requirements
-python run.py synthetic
-```
-
-You will also need to have set up and connected to an Argilla instance for this
-to work. Please follow the instructions in the [Argilla
-documentation](https://docs.argilla.io/latest/getting_started/quickstart/)
-to set up and connect to an Argilla instance on the Hugging Face Hub. [ZenML's
-Argilla integration
-documentation](https://docs.zenml.io/v/docs/stack-components/annotators/argilla)
-will guide you through the process of connecting to your instance as a stack
-component.
-
-Please use the secret from above to track all the secrets. Here we are also
-setting a Huggingface write key. In order to make the rest of the pipeline work for you, you
-will need to change the hf repo urls to a space you have permissions to.
-
-```bash
-zenml secret update llm-complete -v '{"argilla_api_key": "YOUR_ARGILLA_API_KEY", "argilla_api_url": "YOUR_ARGILLA_API_URL", "hf_token": "YOUR_HF_TOKEN"}'
-```
-
-### Finetune the embeddings
-
-As with the previous pipeline, you will need to have set up and connected to an Argilla instance for this
-to work. Please follow the instructions in the [Argilla
-documentation](https://docs.argilla.io/latest/getting_started/quickstart/)
-to set up and connect to an Argilla instance on the Hugging Face Hub. [ZenML's
-Argilla integration
-documentation](https://docs.zenml.io/v/docs/stack-components/annotators/argilla)
-will guide you through the process of connecting to your instance as a stack
-component.
-
-The pipeline assumes that your argilla secret is stored within a ZenML secret called `argilla_secrets`. 
-![Argilla Secret](.assets/argilla_secret.png)
-
-To run the pipeline for finetuning the embeddings, you can use the following
-commands:
-
-```shell
-pip install -r requirements-argilla.txt # special requirements
-python run.py embeddings
-```
-
-*Credit to Phil Schmid for his [tutorial on embeddings finetuning with Matryoshka
-loss function](https://www.philschmid.de/fine-tune-embedding-model-for-rag) which we adapted for this project.*
-
-## ☁️ Running in your own VPC
-
-The basic RAG pipeline will run using a local stack, but if you want to improve
-the speed of the embeddings step you might want to consider using a cloud
-orchestrator. Please follow the instructions in [documentation on popular integrations](https://docs.zenml.io/how-to/popular-integrations) (currently available for
-[AWS](https://docs.zenml.io/how-to/popular-integrations/aws-guide) and
-[GCP](https://docs.zenml.io/how-to/popular-integrations/gcp-guide)) to learn how you
-can run the pipelines on a remote stack.
-
-If you run the pipeline using a cloud artifact store, logs from all the steps as
-well as assets like the visualizations will all be shown in the ZenML dashboard.
-
 ### BONUS: Connect to ZenML Pro
 
-If you run the pipeline using ZenML Pro you'll have access to the managed
-dashboard which will allow you to get started quickly. We offer a free trial so
-you can try out the platform without any cost. Visit the [ZenML Pro
+If you run the pipeline using ZenML Pro you'll have access to 
+the managed
+dashboard which will allow you to get started quickly. We offer 
+a free trial so
+you can try out the platform without any cost. Visit the [ZenML 
+Pro
 dashboard](https://cloud.zenml.io/) to get started.
 
-You can also self-host the ZenML dashboard. Instructions are available in our
-[documentation](https://docs.zenml.io/getting-started/deploying-zenml).
+You can also self-host the ZenML dashboard. Instructions are 
+available in our
+[documentation](https://docs.zenml.io/getting-started/
+deploying-zenml).
 
 ## 📜 Project Structure
 
