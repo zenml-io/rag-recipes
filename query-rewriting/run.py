@@ -42,9 +42,6 @@ import click
 from constants import OPENAI_MODEL
 from materializers.document_materializer import DocumentMaterializer
 from pipelines import (
-    finetune_embeddings,
-    generate_chunk_questions,
-    generate_synthetic_data,
     rag_ingestion,
     llm_eval,
     llm_index_and_evaluate,
@@ -214,9 +211,7 @@ def main(
         config_mapping = {
             "rag_ingestion": "dev/rag.yaml",
             "ingest_and_evaluate": "dev/rag.yaml",
-            "evaluation": "dev/rag_eval.yaml",
-            "synthetic": "dev/synthetic.yaml",
-            "embeddings": "dev/embeddings.yaml",
+            "evaluation": "dev/rag_eval.yaml"
         }
         if pipeline in config_mapping:
             config_path = (
