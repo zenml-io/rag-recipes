@@ -2,9 +2,11 @@
 
 This project demonstrates an implementation of query rewriting for Retrieval-Augmented Generation (RAG) systems, with a strong focus on proper evaluation. Query rewriting enhances RAG by transforming ambiguous or poorly-formed user queries into more effective search queries, improving retrieval quality and final answer accuracy.
 
-![](.assets/rag-pipeline-zenml-cloud.png)
+![RAG Pipeline](.assets/rag-pipeline-zenml-pro.png)
 
 ## What is Query Rewriting?
+
+![Query Rewriting](.assets/query-rewriting.png)
 
 Query rewriting takes the original user query and expands or reformulates it into multiple queries that can better retrieve relevant information. For example:
 
@@ -18,6 +20,7 @@ This technique can significantly improve retrieval quality, but without proper e
 
 ## Why Evaluation Matters
 
+![Evaluation](.assets/evaluation.png)
 While query rewriting can improve RAG system performance, it requires rigorous evaluation to ensure:
 
 1. **Intent preservation**: Rewritten queries should maintain the original user's intent
@@ -73,8 +76,6 @@ database. It's simple to use and has a free tier that should be sufficient for
 this project. Once you've created a Supabase account and organization, you'll
 need to create a new project.
 
-![](.assets/supabase-create-project.png)
-
 You'll want to save the Supabase database password as a ZenML secret so that it
 isn't stored in plaintext. You can do this by running the following command:
 
@@ -84,8 +85,6 @@ zenml secret update llm-complete -v '{"supabase_password": "YOUR_PASSWORD", "sup
 
 You can get the user, host and port for this database instance by getting the connection
 string from the Supabase dashboard.
-
-![](.assets/supabase-connection-string.png)
 
 In case Supabase is not an option for you, you can use a different database as the backend.
 
@@ -111,15 +110,14 @@ use for the LLM.
 When you're ready to make the query, run the following command:
 
 ```shell
-python run.py query --query-text "how do I use a custom materializer inside my own zenml steps? i.e. how do I set it? inside the @step decorator?" --model=gpt4
+python run.py query --query-text "how do I use a custom materializer inside my own zenml steps? i.e. how do I set it? inside the @step decorator?" --model=gpt4o
 ```
 
 Alternative options for LLMs to use include:
 
-- `gpt4`
-- `gpt35`
-- `claude3`
-- `claudehaiku`
+- `gpt4o` (default)
+- `claude3` (Claude 3.7 Sonnet)
+- `claudehaiku` (Claude 3.5 Haiku)
 
 Note that Claude will require a different API key from Anthropic. See [the
 `litellm` docs](https://docs.litellm.ai/docs/providers/anthropic) on how to set
@@ -138,7 +136,7 @@ the database to evaluate.
 
 ### Deploying the RAG pipeline
 
-![](.assets/huggingface-space-rag-deployment.png)
+![Hugging Face Space](.assets/huggingface-space-rag-deployment.png)
 
 You'll need to update and add some secrets to make this work with your Hugging
 Face account. To get your ZenML service account API token and store URL, you can
@@ -198,39 +196,50 @@ The project loosely follows [the recommended ZenML project structure](https://do
 .
 ├── LICENSE                                             # License file
 ├── README.md                                           # Project documentation
-├── __init__.py
+├── ZENML_VERSION.txt                                   # ZenML version file
+├── configs/                                            # Configuration files
+│   ├── dev/                                            # Development configurations
+│   ├── production/                                     # Production configurations
+│   └── staging/                                        # Staging configurations
 ├── constants.py                                        # Constants used throughout the project
-├── materializers
+├── deployment_hf.py                                    # Hugging Face deployment script
+├── materializers/                                      # Custom materializers
 │   ├── __init__.py
 │   └── document_materializer.py                        # Document materialization logic
 ├── most_basic_eval.py                                  # Basic evaluation script
 ├── most_basic_rag_pipeline.py                          # Basic RAG pipeline script
-├── notebooks
-│   └── visualise_embeddings.ipynb                      # Notebook to visualize embeddings
-├── pipelines
+├── pipelines/                                          # Pipeline definitions
 │   ├── __init__.py
-│   ├── generate_chunk_questions.py                     # Pipeline to generate chunk questions
-│   ├── llm_basic_rag.py                                # Basic RAG pipeline using LLM
-│   └── llm_eval.py                                     # Pipeline for LLM evaluation
+│   ├── llm_eval.py                                     # LLM evaluation pipeline
+│   ├── llm_index_and_evaluate.py                       # LLM index and evaluate pipeline
+│   ├── rag_deployment.py                               # RAG deployment pipeline
+│   └── rag_ingestion.py                                # RAG ingestion pipeline
 ├── requirements.txt                                    # Project dependencies
 ├── run.py                                              # Main script to run the project
-├── steps
+├── steps/                                              # Pipeline steps
 │   ├── __init__.py
 │   ├── eval_e2e.py                                     # End-to-end evaluation step
+│   ├── eval_e2e_expansion.py                           # End-to-end evaluation with expansion step
+│   ├── eval_pii.py                                     # PII evaluation step
+│   ├── eval_query_rewriting.py                         # Query rewriting evaluation step
 │   ├── eval_retrieval.py                               # Retrieval evaluation step
 │   ├── eval_visualisation.py                           # Evaluation visualization step
 │   ├── populate_index.py                               # Step to populate the index
-│   ├── synthetic_data.py                               # Step to generate synthetic data
+│   ├── rag_deployment.py                               # RAG deployment step
 │   ├── url_scraper.py                                  # Step to scrape URLs
 │   ├── url_scraping_utils.py                           # Utilities for URL scraping
 │   └── web_url_loader.py                               # Step to load web URLs
 ├── structures.py                                       # Data structures used in the project
-├── tests
+├── tests/                                              # Tests
 │   ├── __init__.py
 │   └── test_url_scraping_utils.py                      # Tests for URL scraping utilities
-└── utils
+└── utils/                                              # Utility functions
     ├── __init__.py
-    └── llm_utils.py                                    # Utilities related to the LLM
+    ├── hf_utils.py                                     # Hugging Face utilities
+    ├── llm_utils.py                                    # LLM utilities
+    ├── openai_utils.py                                 # OpenAI utilities
+    ├── test_tracing.py                                 # Test tracing utilities
+    └── visualization_utils.py                          # Visualization utilities
 ```
 
 ## 🙏🏻 Inspiration and Credit
