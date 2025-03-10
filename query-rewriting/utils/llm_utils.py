@@ -665,8 +665,6 @@ def process_rewritten_queries(
     vector_store = find_vectorstore_name()
     if vector_store == "elasticsearch":
         client = get_es_client()
-    # elif vector_store == "pinecone":
-    #     client = get_pinecone_client(model_version_name_or_id=model_version_stage)
     else:  # pgvector
         client = get_db_conn()
 
@@ -682,7 +680,6 @@ def process_rewritten_queries(
         similar_docs = get_topn_similar_docs(
             query_embedding=query_embedding,
             es_client=client if vector_store == "elasticsearch" else None,
-            # pinecone_index=client if vector_store == "pinecone" else None,
             conn=client if vector_store not in ["elasticsearch"] else None,  # Removed "pinecone"
             n=n_items_per_query,
             include_metadata=True,

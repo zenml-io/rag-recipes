@@ -56,9 +56,9 @@ logger = get_logger(__name__)
 
 @click.command(
     help="""
-ZenML LLM Complete Guide project CLI v0.1.0.
+ZenML Query Rewriting RAG project CLI v0.1.0.
 
-Run the ZenML LLM RAG complete guide project pipelines.
+Run the ZenML Query Rewriting RAG project pipelines.
 """
 )
 @click.argument(
@@ -110,13 +110,6 @@ Run the ZenML LLM RAG complete guide project pipelines.
     help="Disable cache.",
 )
 @click.option(
-    "--argilla",
-    "use_argilla",
-    is_flag=True,
-    default=False,
-    help="Uses Argilla annotations.",
-)
-@click.option(
     "--reranked",
     "use_reranker",
     is_flag=True,
@@ -142,7 +135,6 @@ def main(
     zenml_model_name: str = "zenml-docs-qa-chatbot",
     zenml_model_version: str = None,
     no_cache: bool = False,
-    use_argilla: bool = False,
     use_reranker: bool = False,
     config: Optional[str] = None,
 ):
@@ -155,19 +147,10 @@ def main(
         zenml_model_name (str): The name of the ZenML model to use
         zenml_model_version (str): The name of the ZenML model version to use
         no_cache (bool): If True, cache will be disabled
-        use_argilla (bool): If True, Argilla an notations will be used
         use_reranker (bool): If True, rerankers will be used
         config (Optional[str]): Path to config file
     """
     pipeline_args = {"enable_cache": not no_cache}
-    embeddings_finetune_args = {
-        "enable_cache": not no_cache,
-        "steps": {
-            "prepare_load_data": {
-                "parameters": {"use_argilla_annotations": use_argilla}
-            }
-        },
-    }
 
     # Read the model version from a file in the root of the repo
     #  called "ZENML_VERSION.txt".
