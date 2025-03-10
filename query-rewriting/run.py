@@ -79,14 +79,13 @@ Run the ZenML LLM RAG complete guide project pipelines.
     "model",
     type=click.Choice(
         [
-            "gpt4",
-            "gpt35",
+            "gpt4o",
             "claude3",
             "claudehaiku",
         ]
     ),
     required=False,
-    default="gpt4",
+    default="gpt4o",
     help="The model to use for the completion.",
 )
 @click.option(

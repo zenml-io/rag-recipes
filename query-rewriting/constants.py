@@ -35,9 +35,8 @@ RATE_LIMIT = 5  # Maximum number of requests per second
 OPENAI_MODEL = "gpt-4o"
 EMBEDDINGS_MODEL = "sentence-transformers/all-MiniLM-L12-v2"
 MODEL_NAME_MAP = {
-    "gpt4": "gpt-4",
-    "gpt35": "gpt-3.5-turbo",
-    "claude3": "claude-3-5-sonnet-latest",
+    "gpt4o": "gpt-4o",
+    "claude3": "claude-3-7-sonnet-latest",
     "claudehaiku": "claude-3-5-haiku-latest",
 }
 
