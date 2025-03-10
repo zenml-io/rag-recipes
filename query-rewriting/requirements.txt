@@ -1,4 +1,4 @@
-zenml[server]>=0.73.0
+zenml[server]>=0.74.0
 ratelimit
 pgvector
 psycopg2-binary
@@ -10,9 +10,7 @@ numpy
 sentence-transformers>=3,<=3.0.1
 transformers<=4.44.0
 litellm
-ollama
 tiktoken
-umap-learn
 matplotlib
 pyarrow
 rerankers[flashrank]
@@ -22,12 +20,3 @@ gradio
 huggingface-hub
 elasticsearch
 tenacity
-polars<=1.4.1
-argilla<=2.0.0
-distilabel<=1.3.1
-accelerate<=0.33.0
-
-# optional requirements for S3 artifact store
-# s3fs>2022.3.0
-# boto3
-# aws-profile-manager
